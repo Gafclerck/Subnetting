@@ -23,18 +23,16 @@ def display_network_info(ip_address):
         ip_address: Objet IpAddress contenant les informations à afficher
     """
     info_labels = [
-        ("IP Address", ip_address.ip),
-        ("IP Address (bin)", ip_address.bin_ip()),
-        ("Network Address", ip_address.network()),
+        ("Network Address", ip_address.network_address),
         ("Network Address (bin)", ip_address.bin_network()),
-        ("Broadcast Address", ip_address.broadcast()),
-        ("First usable Address", ip_address.first_add()),
-        ("Last usable Address", ip_address.last_add()),
+        ("Broadcast Address", ip_address.broadcast_address),
+        ("First usable Address", ip_address.first_address),
+        ("Last usable Address", ip_address.last_address),
         ("Usable IP Range", ip_address.host_range()),
-        ("Netmask", ip_address.subnet_mask()),
-        ("Netmask Cidr Notation", ip_address.cidr_notation()),
-        ("Netmask (bin)", ip_address.bin_mask()),
-        ("Number of Hosts", ip_address.num_addresses()),
+        ("Cidr Notation", ip_address),
+        ("Netmask", ip_address.netmask),
+        ("Netmask (bin)", ip_address.bin_netmask()),
+        ("Number of Hosts", ip_address.num_addresses),
         ("Number of Usable Hosts", ip_address.num_usable_hosts())
     ]
 
@@ -52,6 +50,9 @@ def display_subnet_table(subnets_list):
 
     def print_table_row(a, b, c, fill_char=" "):
         """Affiche une ligne formatée du tableau."""
+        a = str(a)
+        b = str(b)
+        c = str(c)
         print(
             f"{COLOR_TABLE}{a.center(20, fill_char)}|{b.center(40, fill_char)}|{c.center(20, fill_char)}{COLOR_LABEL}")
 
@@ -60,7 +61,7 @@ def display_subnet_table(subnets_list):
     print_table_row("", "", "", "_")
 
     for subnet in subnets_list:
-        print_table_row(subnet.network(), subnet.host_range(), subnet.broadcast())
+        print_table_row(subnet.network_address, subnet.host_range(), subnet.broadcast_address)
 
 
 def main():
@@ -69,17 +70,16 @@ def main():
         # Récupération des entrées utilisateur
         ip_input = get_ip("Entrez l'adresse IP (ex: 192.168.1.3/24 ou 192.168.1.3 par défaut /24): ")
         cidr_initial = int(ip_input.split("/")[1])
-        ip = ip_input.split("/")[0]
 
         cidr_final = get_cidr("Entrez le CIDR pour le subnetting (optionnel, laisser vide pour ignorer): ")
-        ip_address = ut.IpAddress(ip, cidr_initial)
+        ip_address = ut.IpAddress(ip_input)
 
         # Affichage des informations réseau
         display_network_info(ip_address)
 
         # Gestion du subnetting si demandé
         if cidr_final != -1:
-            subnets_list = list(ut.subnets(ip, cidr_initial, cidr_final))
+            subnets_list = list(ip_address.subnets(cidr_final - cidr_initial))
             display_subnet_table(subnets_list)
 
     except (IpError, CidrError) as e:
@@ -88,7 +88,6 @@ def main():
     except Exception as e:
         print(f"\n{COLOR_ERROR}Erreur inattendue: {e}{COLOR_LABEL}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     print("\n" + " IP SUBNET CALCULATOR ".center(50, "=") + "\n")

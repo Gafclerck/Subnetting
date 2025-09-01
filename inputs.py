@@ -1,4 +1,4 @@
-from utils import validate_ip, validate_cidr
+from validate import validate_ip, validate_cidr
 
 
 def get_ip(message):
